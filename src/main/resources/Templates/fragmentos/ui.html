@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:fragment="estilos(titulo)">
+    <meta charset="UTF-8">
+    <title th:text="${titulo}">PoliMarket</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; margin: 0; color: #1e293b; }
+        header { background: #0f172a; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 1050px; margin: 25px auto; padding: 0 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        h3 { margin-top: 0; color: #0284c7; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+        input, select, button { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; width: 100%; box-sizing: border-box; }
+        button { background: #0284c7; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { background: #0369a1; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { border-bottom: 1px solid #e2e8f0; padding: 10px; text-align: left; }
+        th { background: #f8fafc; color: #0f172a; }
+    </style>
+</head>
+<body>
+    <header th:fragment="navbar(nombreUsuario)">
+        <div><strong>PoliMarket</strong> | Cliente Web 2 (Java + Thymeleaf Reutilizable)</div>
+        <div>
+            <span th:text="${nombreUsuario}" style="margin-right:15px;"></span>
+            <a href="/salir" style="color:#f87171; text-decoration:none; font-weight:bold;">Cerrar Sesión</a>
+        </div>
+    </header>
+</body>
+</html>

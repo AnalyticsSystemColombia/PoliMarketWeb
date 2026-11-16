@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="~{fragmentos/ui :: estilos('PoliMarket - Login Java Web')}"></head>
+<body style="display:flex; justify-content:center; align-items:center; height:100vh; background:#0f172a;">
+    <div class="card" style="width:350px; padding:30px;">
+        <h2 style="text-align:center; color:#0f172a; margin-top:0;">PoliMarket Java Web</h2>
+        <p style="text-align:center; color:#64748b; font-size:13px;">Acceso Dinámico por Permisos</p>
+        <form action="/login" method="post" style="display:flex; flex-direction:column; gap:12px;">
+            <input type="text" name="username" placeholder="Usuario" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <button type="submit">Ingresar</button>
+        </form>
+        <p th:if="${error}" th:text="${error}" style="color:#dc2626; text-align:center; font-size:13px;"></p>
+    </div>
+</body>
+</html>

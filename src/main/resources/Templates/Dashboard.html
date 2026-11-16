@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="~{fragmentos/ui :: estilos('PoliMarket - Panel Operativo')}"></head>
+<body>
+<header th:replace="~{fragmentos/ui :: navbar(${nombreUsuario})}"></header>
+
+<div class="container">
+    <div class="card" th:if="${#lists.isEmpty(modulos)}" style="text-align:center;">
+        <h3>Usuario sin módulos asignados</h3>
+        <p>Solicita a Recursos Humanos (desde el Cliente Web 1) que te asigne permisos.</p>
+    </div>
+
+    <!-- MÓDULO PROVEEDORES -->
+    <div class="card" th:if="${modulos.contains('MOD_PROVEEDORES')}">
+        <h3>Proveedores</h3>
+        <form action="/proveedores/crear" method="post" class="grid-form">
+            <input type="text" name="nit" placeholder="NIT" required>
+            <input type="text" name="nombre" placeholder="Nombre Empresa" required>
+            <input type="text" name="contacto" placeholder="Contacto" required>
+            <input type="text" name="telefono" placeholder="Teléfono" required>
+            <button type="submit">Registrar Proveedor</button>
+        </form>
+    </div>
+    
+        <!-- MÓDULO SEGURIDAD Y RH -->
+    <div class="card" th:if="${modulos.contains('MOD_SEGURIDAD')}">
+        <h3>Seguridad y Recursos Humanos (Usuarios, Módulos y Permisos)</h3>
+        <form action="/usuarios/crear" method="post" class="grid-form" style="margin-bottom:12px;">
+            <input type="text" name="username" placeholder="Nuevo Usuario" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <input type="text" name="nombreCompleto" placeholder="Nombre Completo" required>
+            <input type="text" name="cargo" placeholder="Cargo" required>
+            <button type="submit">Crear Usuario</button>
+        </form>
+        <form action="/usuarios/permiso" method="post" class="grid-form" style="margin-bottom:12px;">
+            <select name="username"><option th:each="u : ${usuariosLista}" th:value="${u.username}" th:text="${u.nombreCompleto + ' (' + u.username + ')'}"></option></select>
+            <select name="codigoModulo"><option th:each="m : ${modulosLista}" th:value="${m.codigo}" th:text="${m.nombre + ' (' + m.codigo + ')'}"></option></select>
+            <button type="submit">Asignar Permiso</button>
+        </form>
+        <form action="/usuarios/modulo" method="post" class="grid-form">
+            <input type="text" name="codigo" placeholder="Código (Ej: MOD_CONTABLE)" required>
+            <input type="text" name="nombre" placeholder="Nombre Módulo" required>
+            <input type="text" name="descripcion" placeholder="Descripción" required>
+            <button type="submit">Crear Nuevo Módulo</button>
+        </form>
+    </div>
+    
+
+    <!-- MÓDULO BODEGA -->
+    <div class="card" th:if="${modulos.contains('MOD_BODEGA')}">
+        <h3>Bodega: Catálogo y Facturas de Compra (Alta de Stock)</h3>
+        <form action="/bodega/producto" method="post" class="grid-form" style="margin-bottom:12px;">
+            <input type="text" name="codigo" placeholder="Cód. Producto" required>
+            <input type="text" name="nombre" placeholder="Nombre" required>
+            <input type="number" name="precioVenta" placeholder="Precio Venta" required>
+            <input type="number" name="stockMinimo" value="3" required>
+            <select name="nitProveedorPrincipal"><option th:each="p : ${proveedores}" th:value="${p.nit}" th:text="${p.nombre}"></option></select>
+            <button type="submit">Crear Producto</button>
+        </form>
+        <form action="/bodega/factura" method="post" class="grid-form">
+            <input type="text" name="numeroFactura" placeholder="N° Factura" required>
+            <select name="nitProveedor"><option th:each="p : ${proveedores}" th:value="${p.nit}" th:text="${p.nombre}"></option></select>
+            <select name="codigoProducto"><option th:each="pr : ${productos}" th:value="${pr.codigo}" th:text="${pr.nombre}"></option></select>
+            <input type="number" name="cantidadIngresada" placeholder="Cantidad" required>
+            <input type="number" name="costoUnitario" placeholder="Costo Unit." required>
+            <button type="submit">Ingresar Factura</button>
+        </form>
+        <table>
+            <thead><tr><th>Código</th><th>Producto</th><th>Stock Disponible</th><th>Stock Físico</th></tr></thead>
+            <tbody><tr th:each="pr : ${productos}"><td th:text="${pr.codigo}"></td><td th:text="${pr.nombre}"></td><td><strong th:text="${pr.stockDisponible}"></strong></td><td th:text="${pr.stockFisico}"></td></tr></tbody>
+        </table>
+    </div>
+
+    <!-- MÓDULO VENTAS -->
+    <div class="card" th:if="${modulos.contains('MOD_VENTAS')}">
+        <h3>Ventas: Consulta en Tiempo Real y Registro</h3>
+            <!-- GESTIÓN DE CLIENTES (CRUD COMPLETO) -->
+    <div style="background:#f8fafc; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #e2e8f0;">
+        <h4 style="margin-top:0; color:#0f172a;">1. Directorio y Gestión de Clientes</h4>
+        <form action="/ventas/cliente/guardar" method="post" class="grid-form">
+            <input type="text" id="cli-doc" name="documento" placeholder="Documento / NIT" required>
+            <input type="text" id="cli-nom" name="nombre" placeholder="Nombre Completo" required>
+            <input type="text" id="cli-dir" name="direccionEntrega" placeholder="Dirección de Entrega" required>
+            <input type="text" id="cli-tel" name="telefono" placeholder="Teléfono" required>
+            <button type="submit">Guardar / Actualizar Cliente</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Nombre</th>
+                    <th>Dirección de Entrega</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="c : ${clientes}">
+                    <td th:text="${c.documento}"></td>
+                    <td th:text="${c.nombre}"></td>
+                    <td th:text="${c.direccionEntrega}"></td>
+                    <td th:text="${c.telefono}"></td>
+                    <td style="display:flex; gap:6px;">
+                        <button type="button" style="background:#f59e0b; padding:5px 10px; width:auto;"
+                                th:attr="onclick=|editarCliente('${c.documento}','${c.nombre}','${c.direccionEntrega}','${c.telefono}')|">
+                            Editar
+                        </button>
+                        <form th:action="@{'/ventas/cliente/eliminar/' + ${c.documento}}" method="post" style="margin:0;">
+                            <button type="submit" style="background:#ef4444; padding:5px 10px; width:auto;">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function editarCliente(doc, nom, dir, tel) {
+            document.getElementById('cli-doc').value = doc;
+            document.getElementById('cli-nom').value = nom;
+            document.getElementById('cli-dir').value = dir;
+            document.getElementById('cli-tel').value = tel;
+            document.getElementById('cli-nom').focus();
+        }
+    </script>
+        
+        <form action="/ventas/registrar" method="post" class="grid-form">
+            <select name="documentoCliente"><option th:each="c : ${clientes}" th:value="${c.documento}" th:text="${c.nombre}"></option></select>
+            <select name="codigoProducto"><option th:each="d : ${disponibles}" th:value="${d.codigo}" th:text="${d.nombre + ' (Disp: ' + d.stockDisponible + ')'}"></option></select>
+            <input type="number" name="cantidad" value="1" min="1" required>
+            <button type="submit">Registrar Venta</button>
+        </form>
+    </div>
+
+    <!-- MÓDULO ENTREGAS -->
+    <div class="card" th:if="${modulos.contains('MOD_ENTREGAS')}">
+        <h3>Entregas: Programación y Salida Física</h3>
+        <form action="/entregas/programar" method="post" class="grid-form">
+            <select name="idVenta"><option th:each="v : ${pendientes}" th:value="${v.id}" th:text="${'Venta #' + v.id + ' - ' + v.codigoProducto}"></option></select>
+            <input type="date" name="fechaProgramada" required>
+            <input type="text" name="transportador" placeholder="Transportador" required>
+            <input type="text" name="guiaDespacho" placeholder="Guía" required>
+            <button type="submit">Programar Envío</button>
+        </form>
+        <table>
+            <thead><tr><th>ID</th><th>Venta</th><th>Fecha</th><th>Transportador</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody>
+                <tr th:each="e : ${entregas}">
+                    <td th:text="${e.id}"></td><td th:text="${e.idVenta}"></td><td th:text="${e.fechaProgramada}"></td><td th:text="${e.transportador}"></td><td th:text="${e.estadoEntrega}"></td>
+                    <td><form th:if="${e.estadoEntrega == 'PROGRAMADA'}" th:action="@{'/entregas/despachar/' + ${e.id}}" method="post"><button type="submit">Confirmar Salida</button></form></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
