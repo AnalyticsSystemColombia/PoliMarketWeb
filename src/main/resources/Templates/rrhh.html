@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="~{fragmentos/ui :: estilos('PoliMarket - Seguridad y RH')}"></head>
+<body>
+<header th:replace="~{fragmentos/ui :: navbar(${nombreUsuario}, ${modulos}, 'rrhh')}"></header>
+
+<div class="container">
+    <!-- 1. DIRECTORIO Y GESTIÓN DE EMPLEADOS -->
+    <div class="card">
+        <h3>1. Directorio y Gestión de Empleados</h3>
+        <form data-modulo="MOD_SEGURIDAD" data-accion="CREAR" action="/rrhh/usuarios" method="post" class="grid-form">
+            <input type="text" id="usr-user" name="username" placeholder="Usuario (Login)" required>
+            <input type="password" id="usr-pass" name="password" placeholder="Contraseña" required>
+            <input type="text" id="usr-nom" name="nombreCompleto" placeholder="Nombre Completo" required>
+            <input type="text" id="usr-car" name="cargo" placeholder="Cargo" required>
+            <div style="display:flex; gap:6px;">
+                <button type="submit">Guardar</button>
+                <button type="button" onclick="limpiarUsuario()" style="background:#64748b; width:auto;">Nuevo</button>
+            </div>
+        </form>
+
+        <table data-modulo="MOD_SEGURIDAD" data-accion="LEER">
+            <thead>
+                <tr><th>Usuario</th><th>Nombre Completo</th><th>Cargo</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="u : ${usuariosLista}">
+                    <td><strong th:text="${u.username}"></strong></td>
+                    <td th:text="${u.nombreCompleto}"></td>
+                    <td th:text="${u.cargo}"></td>
+                    <td><span style="background:#dcfce7; color:#15803d; padding:3px 8px; border-radius:12px; font-size:12px; font-weight:bold;">Activo</span></td>
+                    <td style="display:flex; gap:6px;">
+                        <button data-modulo="MOD_SEGURIDAD" data-accion="EDITAR" type="button"
+                                style="background:#f59e0b; padding:5px 10px; width:auto; font-size:12px;"
+                                th:attr="onclick=|cargarUsuario('${u.username}','${u.nombreCompleto}','${u.cargo}')|">
+                            Editar
+                        </button>
+                        <form data-modulo="MOD_SEGURIDAD" data-accion="ELIMINAR" th:if="${u.username != 'admin'}" action="/rrhh/usuarios/eliminar" method="post" style="margin:0;">
+                            <input type="hidden" name="username" th:value="${u.username}">
+                            <button type="submit" style="background:#ef4444; padding:5px 10px; width:auto; font-size:12px;">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 2. MATRIZ VISUAL DE PERMISOS GRANULARES -->
+    <div class="card">
+        <h3>2. Asignación y Matriz Visual de Permisos</h3>
+        <form data-modulo="MOD_SEGURIDAD" data-accion="EDITAR" action="/rrhh/permisos" method="post" class="grid-form" style="align-items:center;">
+            <select id="perm-user" name="username">
+                <option th:each="u : ${usuariosLista}" th:value="${u.username}" th:text="${u.nombreCompleto + ' (' + u.username + ')'}"></option>
+            </select>
+            <select id="perm-mod" name="codigoModulo">
+                <option th:each="m : ${modulosLista}" th:value="${m.codigo}" th:text="${m.nombre}"></option>
+            </select>
+            <div style="display:flex; gap:10px; font-size:13px;">
+                <label><input type="checkbox" id="chk-leer" name="puedeLeer" value="true" checked> Leer</label>
+                <label><input type="checkbox" id="chk-crear" name="puedeCrear" value="true"> Crear</label>
+                <label><input type="checkbox" id="chk-editar" name="puedeEditar" value="true"> Editar</label>
+                <label><input type="checkbox" id="chk-elim" name="puedeEliminar" value="true"> Eliminar</label>
+            </div>
+            <button type="submit">Guardar Permisos</button>
+        </form>
+
+        <table data-modulo="MOD_SEGURIDAD" data-accion="LEER">
+            <thead>
+                <tr><th>Usuario</th><th>Módulo</th><th>Leer</th><th>Crear</th><th>Editar</th><th>Eliminar</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="p : ${permisosLista}">
+                    <td><strong th:text="${p.username}"></strong></td>
+                    <td th:text="${p.codigoModulo}"></td>
+                    <td th:text="${p.puedeLeer ? '✔ Sí' : '✖ No'}"></td>
+                    <td th:text="${p.puedeCrear ? '✔ Sí' : '✖ No'}"></td>
+                    <td th:text="${p.puedeEditar ? '✔ Sí' : '✖ No'}"></td>
+                    <td th:text="${p.puedeEliminar ? '✔ Sí' : '✖ No'}"></td>
+                    <td style="display:flex; gap:6px;">
+                        <button data-modulo="MOD_SEGURIDAD" data-accion="EDITAR" type="button"
+                                style="background:#f59e0b; padding:5px 10px; width:auto; font-size:12px;"
+                                th:attr="onclick=|cargarPermiso('${p.username}','${p.codigoModulo}',${p.puedeLeer},${p.puedeCrear},${p.puedeEditar},${p.puedeEliminar})|">
+                            Editar
+                        </button>
+                        <form data-modulo="MOD_SEGURIDAD" data-accion="ELIMINAR" th:if="${!(p.username == 'admin' and p.codigoModulo == 'MOD_SEGURIDAD')}" action="/rrhh/permisos/revocar" method="post" style="margin:0;">
+                            <input type="hidden" name="username" th:value="${p.username}">
+                            <input type="hidden" name="codigoModulo" th:value="${p.codigoModulo}">
+                            <button type="submit" style="background:#ef4444; padding:5px 10px; width:auto; font-size:12px;">Revocar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 3. ESCALABILIDAD DE MÓDULOS -->
+    <div class="card">
+        <h3>3. Escalabilidad: Registrar Nuevo Módulo</h3>
+        <form data-modulo="MOD_SEGURIDAD" data-accion="CREAR" action="/rrhh/modulos" method="post" class="grid-form">
+            <input type="text" name="codigo" placeholder="Código (Ej: MOD_AUDITORIA)" required>
+            <input type="text" name="nombre" placeholder="Nombre Módulo" required>
+            <input type="text" name="descripcion" placeholder="Descripción" required>
+            <button type="submit">Registrar Módulo</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function cargarUsuario(user, nom, cargo) {
+        const inputUser = document.getElementById('usr-user');
+        inputUser.value = user;
+        inputUser.readOnly = true;
+        inputUser.style.background = '#e2e8f0';
+        document.getElementById('usr-nom').value = nom;
+        document.getElementById('usr-car').value = cargo;
+        document.getElementById('usr-pass').focus();
+    }
+
+    function limpiarUsuario() {
+        const inputUser = document.getElementById('usr-user');
+        inputUser.value = '';
+        inputUser.readOnly = false;
+        inputUser.style.background = 'white';
+        document.getElementById('usr-pass').value = '';
+        document.getElementById('usr-nom').value = '';
+        document.getElementById('usr-car').value = '';
+        inputUser.focus();
+    }
+
+    function cargarPermiso(user, mod, leer, crear, editar, elim) {
+        document.getElementById('perm-user').value = user;
+        document.getElementById('perm-mod').value = mod;
+        document.getElementById('chk-leer').checked = leer;
+        document.getElementById('chk-crear').checked = crear;
+        document.getElementById('chk-editar').checked = editar;
+        document.getElementById('chk-elim').checked = elim;
+    }
+</script>
+
+<script th:replace="~{fragmentos/ui :: seguridadVisual(${permisosMap})}"></script>
+<script th:replace="~{fragmentos/ui :: notificaciones}"></script>
+</body>
+</html>

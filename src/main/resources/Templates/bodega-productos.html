@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="~{fragmentos/ui :: estilos('PoliMarket - Inventario Maestro')}"></head>
+<body>
+<header th:replace="~{fragmentos/ui :: navbar(${nombreUsuario}, ${modulos}, 'bodega')}"></header>
+
+<div class="container">
+    <!-- SUBMENÚ CON CONTADOR DE PENDIENTES -->
+    <div style="display:flex; gap:10px; margin-bottom:18px;">
+        <a href="/bodega/productos" style="background:#0284c7; color:white; padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:bold;">
+            📦 1. Inventario Maestro
+        </a>
+        <a href="/bodega/facturas" style="background:#e2e8f0; color:#1e293b; padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:bold;">
+            📥 2. Pendientes por Dar de Alta
+            <span th:if="${pendientesCount > 0}" th:text="${pendientesCount}" style="background:#ef4444; color:white; padding:2px 7px; border-radius:10px; font-size:12px; margin-left:4px;"></span>
+        </a>
+    </div>
+
+    <!-- CREAR NUEVA REFERENCIA DE PRODUCTO -->
+    <div class="card">
+        <h3>Registrar Nueva Referencia de Producto</h3>
+        <form data-modulo="MOD_BODEGA" data-accion="CREAR" action="/bodega/productos" method="post" class="grid-form">
+            <input type="hidden" id="prod-cod" name="codigo" value="AUTO">
+            <select id="prod-marca" name="marca" required>
+                <option value="" disabled selected>Marca...</option>
+                <option value="Lenovo">Lenovo</option>
+                <option value="Dell">Dell</option>
+                <option value="HP">HP</option>
+                <option value="Asus">Asus</option>
+                <option value="Apple">Apple</option>
+            </select>
+            <select id="prod-cat" name="categoria" required>
+                <option value="" disabled selected>Categoría...</option>
+                <option value="Empresarial">Empresarial</option>
+                <option value="Gaming">Gaming</option>
+                <option value="Ultrabook">Ultrabook</option>
+                <option value="Uso Diario">Uso Diario</option>
+            </select>
+            <input type="text" id="prod-nom" name="nombre" placeholder="Referencia (Ej: ThinkPad T480)" required>
+            <input type="text" id="prod-car" name="caracteristicas" placeholder="Características (Ej: Core i5, 16GB RAM)" required>
+            <input type="number" id="prod-pre" name="precioVenta" placeholder="Precio Venta ($)" min="1" required>
+            <input type="number" id="prod-min" name="stockMinimo" value="5" placeholder="Stock Mínimo" min="1" required>
+            <select id="prod-prov" name="nitProveedorPrincipal" required>
+                <option value="" disabled selected>Proveedor Principal...</option>
+                <option th:each="p : ${proveedores}" th:value="${p?.get('nit')}" th:text="${p?.get('nombre')}"></option>
+            </select>
+            <div style="display:flex; gap:6px;">
+                <button type="submit">Guardar</button>
+                <button type="button" onclick="limpiarProd()" style="background:#64748b; width:auto;">Nuevo</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- TABLA DE INVENTARIO MAESTRO (SOLO PRODUCTOS DADOS DE ALTA) -->
+    <div class="card">
+        <h3>Inventario Maestro (Productos Dados de Alta y Disponibles)</h3>
+        <table data-modulo="MOD_BODEGA" data-accion="LEER">
+            <thead>
+                <tr>
+                    <th>Código</th><th>Marca</th><th>Categoría</th><th>Referencia</th><th>Características</th><th>Precio Venta</th><th>Cant. Disponible</th><th>Cant. Física</th><th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="pr : ${productos}">
+                    <td><strong style="color:#0284c7;" th:text="${pr?.get('codigo')}"></strong></td>
+                    <td th:text="${pr?.get('marca') ?: '-'}"></td>
+                    <td><span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:10px; font-size:12px;" th:text="${pr?.get('categoria') ?: 'General'}"></span></td>
+                    <td><strong th:text="${pr?.get('nombre')}"></strong></td>
+                    <td style="font-size:12px;" th:text="${pr?.get('caracteristicas') ?: '-'}"></td>
+                    <td th:text="${'$' + pr?.get('precioVenta')}"></td>
+                    <td><strong style="color:#16a34a;" th:text="${pr?.get('stockDisponible')}"></strong></td>
+                    <td th:text="${pr?.get('stockFisico')}"></td>
+                    <td>
+                        <button data-modulo="MOD_BODEGA" data-accion="EDITAR" type="button"
+                                style="background:#f59e0b; padding:5px 10px; width:auto; font-size:12px;"
+                                th:data-cod="${pr?.get('codigo')}"
+                                th:data-mar="${pr?.get('marca')}"
+                                th:data-cat="${pr?.get('categoria')}"
+                                th:data-nom="${pr?.get('nombre')}"
+                                th:data-car="${pr?.get('caracteristicas')}"
+                                th:data-pre="${pr?.get('precioVenta')}"
+                                th:data-min="${pr?.get('stockMinimo')}"
+                                th:data-prov="${pr?.get('nitProveedorPrincipal')}"
+                                onclick="cargarProd(this)">
+                            Editar
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function cargarProd(btn) {
+        document.getElementById('prod-cod').value = btn.getAttribute('data-cod');
+        document.getElementById('prod-marca').value = btn.getAttribute('data-mar') || 'Lenovo';
+        document.getElementById('prod-cat').value = btn.getAttribute('data-cat') || 'Empresarial';
+        document.getElementById('prod-nom').value = btn.getAttribute('data-nom');
+        document.getElementById('prod-car').value = btn.getAttribute('data-car') || '';
+        document.getElementById('prod-pre').value = btn.getAttribute('data-pre');
+        document.getElementById('prod-min').value = btn.getAttribute('data-min');
+        document.getElementById('prod-prov').value = btn.getAttribute('data-prov') || '';
+        document.getElementById('prod-nom').focus();
+    }
+    function limpiarProd() {
+        document.getElementById('prod-cod').value = 'AUTO';
+        document.getElementById('prod-nom').value = '';
+        document.getElementById('prod-car').value = '';
+        document.getElementById('prod-pre').value = '';
+        document.getElementById('prod-min').value = '5';
+    }
+</script>
+
+<script th:replace="~{fragmentos/ui :: seguridadVisual(${permisosMap})}"></script>
+<script th:replace="~{fragmentos/ui :: notificaciones}"></script>
+</body>
+</html>

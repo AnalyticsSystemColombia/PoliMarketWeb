@@ -6,7 +6,9 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; margin: 0; color: #1e293b; }
         header { background: #0f172a; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .container { max-width: 1050px; margin: 25px auto; padding: 0 20px; }
+        nav a { color: #94a3b8; text-decoration: none; font-weight: 600; padding: 6px 12px; border-radius: 6px; transition: 0.2s; }
+        nav a:hover, nav a.active { background: #1e293b; color: #38bdf8; }
+        .container { max-width: 1100px; margin: 25px auto; padding: 0 20px; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
         h3 { margin-top: 0; color: #0284c7; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
         .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
@@ -19,12 +21,62 @@
     </style>
 </head>
 <body>
-    <header th:fragment="navbar(nombreUsuario)">
-        <div><strong>PoliMarket</strong> | Cliente Web 2 (Java + Thymeleaf Reutilizable)</div>
-        <div>
-            <span th:text="${nombreUsuario}" style="margin-right:15px;"></span>
-            <a href="/salir" style="color:#f87171; text-decoration:none; font-weight:bold;">Cerrar Sesión</a>
-        </div>
-    </header>
+
+<header th:fragment="navbar(nombreUsuario, modulos, activo)">
+    <div style="display:flex; align-items:center; gap:25px;">
+        <strong style="font-size:18px;">PoliMarket</strong>
+        <nav style="display:flex; gap:8px;">
+            <a th:if="${modulos.contains('MOD_SEGURIDAD')}" href="/rrhh" th:classappend="${activo == 'rrhh' ? 'active' : ''}">Seguridad y RH</a>
+            <a th:if="${modulos.contains('MOD_PROVEEDORES')}" href="/proveedores" th:classappend="${activo == 'proveedores' ? 'active' : ''}">Proveedores</a>
+            <a th:if="${modulos.contains('MOD_BODEGA')}" href="/bodega/productos" th:classappend="${activo == 'bodega' ? 'active' : ''}">Bodega</a>
+            <a th:if="${modulos.contains('MOD_VENTAS')}" href="/ventas" th:classappend="${activo == 'ventas' ? 'active' : ''}">Ventas</a>
+            <a th:if="${modulos.contains('MOD_ENTREGAS')}" href="/entregas" th:classappend="${activo == 'entregas' ? 'active' : ''}">Entregas</a>
+        </nav>
+    </div>
+    <div>
+        <span th:text="${nombreUsuario}" style="margin-right:15px; font-size:14px;"></span>
+        <a href="/salir" style="color:#f87171; text-decoration:none; font-weight:bold;">Cerrar Sesión</a>
+    </div>
+</header>
+
+<script th:fragment="seguridadVisual(permisosMap)" th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+        const permisos = /*[[${permisosMap}]]*/ {};
+        document.querySelectorAll("[data-modulo][data-accion]").forEach(el => {
+            const mod = el.getAttribute("data-modulo");
+            const acc = el.getAttribute("data-accion");
+            const p = permisos[mod];
+            const ok = p && (
+                (acc === "LEER" && p.puedeLeer) ||
+                (acc === "CREAR" && p.puedeCrear) ||
+                (acc === "EDITAR" && p.puedeEditar) ||
+                (acc === "ELIMINAR" && p.puedeEliminar)
+            );
+            if (!ok) el.remove();
+        });
+    });
+</script>
+
+<script th:fragment="notificaciones" th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+        const exito = /*[[${exito}]]*/ null;
+        const error = /*[[${error}]]*/ null;
+        const msg = exito || error;
+        if (!msg) return;
+
+        const toast = document.createElement("div");
+        toast.textContent = (exito ? "✔ " : "✖ ") + msg;
+        Object.assign(toast.style, {
+            position: "fixed", top: "20px", right: "20px", zIndex: "9999",
+            background: exito ? "#16a34a" : "#dc2626", color: "white",
+            padding: "12px 20px", borderRadius: "8px", fontWeight: "bold",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)", fontSize: "14px",
+            transition: "opacity 0.4s ease"
+        });
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 400); }, 3200);
+    });
+</script>
+
 </body>
 </html>

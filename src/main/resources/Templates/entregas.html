@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="~{fragmentos/ui :: estilos('PoliMarket - Entregas y Logística')}"></head>
+<body>
+<header th:replace="~{fragmentos/ui :: navbar(${nombreUsuario}, ${modulos}, 'entregas')}"></header>
+
+<div class="container">
+    <div class="card">
+        <h3>1. Programación de Despachos (Ventas Pendientes)</h3>
+        <p th:if="${#lists.isEmpty(pendientes)}" style="color:#64748b; font-size:14px;">
+            No hay ventas pendientes por programar envío en este momento.
+        </p>
+        <form th:if="${!#lists.isEmpty(pendientes)}" data-modulo="MOD_ENTREGAS" data-accion="CREAR" action="/entregas/programar" method="post" class="grid-form">
+            <select name="idVenta" required>
+                <option th:each="v : ${pendientes}" th:value="${v.id}" th:text="${'Venta #' + v.id + ' - Prod: ' + v.codigoProducto + ' (' + v.cantidad + ' und.)'}"></option>
+            </select>
+            <input type="date" name="fechaProgramada" required>
+            <input type="text" name="transportador" placeholder="Transportador / Empresa" required>
+            <input type="text" name="guiaDespacho" value="AUTO" readonly style="background:#e2e8f0; font-weight:bold;">
+            <button type="submit">Programar Envío</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3>2. Control de Guías y Confirmación de Salida Física</h3>
+        <table data-modulo="MOD_ENTREGAS" data-accion="LEER">
+            <thead>
+                <tr><th>ID Entrega</th><th>Venta Asociada</th><th>Fecha Programada</th><th>Transportador</th><th>N° Guía</th><th>Estado</th><th>Acción</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="e : ${entregas}">
+                    <td><strong th:text="${'#' + e.id}"></strong></td>
+                    <td th:text="${'Venta #' + e.idVenta}"></td>
+                    <td th:text="${e.fechaProgramada}"></td>
+                    <td th:text="${e.transportador}"></td>
+                    <td th:text="${e.guiaDespacho}"></td>
+                    <td>
+                        <span th:if="${e.estadoEntrega == 'PROGRAMADA'}" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:12px; font-size:12px; font-weight:bold;">PROGRAMADA</span>
+                        <span th:if="${e.estadoEntrega == 'DESPACHADA'}" style="background:#dcfce7; color:#15803d; padding:4px 8px; border-radius:12px; font-size:12px; font-weight:bold;">DESPACHADA</span>
+                    </td>
+                    <td>
+                        <form data-modulo="MOD_ENTREGAS" data-accion="EDITAR" th:if="${e.estadoEntrega == 'PROGRAMADA'}" th:action="@{'/entregas/despachar/' + ${e.id}}" method="post" style="margin:0;">
+                            <button type="submit" style="background:#10b981; padding:6px 12px; width:auto; font-size:12px;">
+                                Confirmar Salida Física
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script th:replace="~{fragmentos/ui :: seguridadVisual(${permisosMap})}"></script>
+<script th:replace="~{fragmentos/ui :: notificaciones}"></script>
+</body>
+</html>

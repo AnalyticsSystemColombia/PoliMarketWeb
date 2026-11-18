@@ -32,17 +32,73 @@
             <input type="text" name="cargo" placeholder="Cargo" required>
             <button type="submit">Crear Usuario</button>
         </form>
-        <form action="/usuarios/permiso" method="post" class="grid-form" style="margin-bottom:12px;">
-            <select name="username"><option th:each="u : ${usuariosLista}" th:value="${u.username}" th:text="${u.nombreCompleto + ' (' + u.username + ')'}"></option></select>
-            <select name="codigoModulo"><option th:each="m : ${modulosLista}" th:value="${m.codigo}" th:text="${m.nombre + ' (' + m.codigo + ')'}"></option></select>
-            <button type="submit">Asignar Permiso</button>
-        </form>
+        <form action="/usuarios/permiso" method="post" class="grid-form" style="margin-bottom:15px; align-items:center;">
+    <select name="username">
+        <option th:each="u : ${usuariosLista}" th:value="${u.username}" th:text="${u.nombreCompleto + ' (' + u.username + ')'}"></option>
+    </select>
+    <select name="codigoModulo">
+        <option th:each="m : ${modulosLista}" th:value="${m.codigo}" th:text="${m.nombre}"></option>
+    </select>
+    <div style="display:flex; gap:10px; font-size:13px;">
+        <label><input type="checkbox" name="puedeLeer" value="true" checked> Leer</label>
+        <label><input type="checkbox" name="puedeCrear" value="true"> Crear</label>
+        <label><input type="checkbox" name="puedeEditar" value="true"> Editar</label>
+        <label><input type="checkbox" name="puedeEliminar" value="true"> Eliminar</label>
+    </div>
+    <button type="submit">Guardar Permisos</button>
+</form>
         <form action="/usuarios/modulo" method="post" class="grid-form">
             <input type="text" name="codigo" placeholder="Código (Ej: MOD_CONTABLE)" required>
             <input type="text" name="nombre" placeholder="Nombre Módulo" required>
             <input type="text" name="descripcion" placeholder="Descripción" required>
             <button type="submit">Crear Nuevo Módulo</button>
         </form>
+        <!-- MATRIZ VISUAL DE PERMISOS POR USUARIO -->
+<div style="margin-top: 20px; border-top: 2px solid #e2e8f0; padding-top: 15px;">
+    <h4 style="margin-top: 0; color: #0f172a;">Matriz Visual de Permisos Activos por Usuario</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Módulo Habilitado</th>
+                <th style="text-align:center;">Leer</th>
+                <th style="text-align:center;">Crear</th>
+                <th style="text-align:center;">Editar</th>
+                <th style="text-align:center;">Eliminar</th>
+                <th>Gestión</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="p : ${permisosLista}">
+                <td><strong th:text="${p.username}"></strong></td>
+                <td th:text="${p.codigoModulo}"></td>
+                <td style="text-align:center;">
+                    <span th:if="${p.puedeLeer}" style="background:#dcfce7; color:#15803d; padding:3px 8px; border-radius:12px; font-size:12px; font-weight:bold;">✔ Sí</span>
+                    <span th:unless="${p.puedeLeer}" style="background:#fee2e2; color:#b91c1c; padding:3px 8px; border-radius:12px; font-size:12px;">✖ No</span>
+                </td>
+                <td style="text-align:center;">
+                    <span th:if="${p.puedeCrear}" style="background:#dcfce7; color:#15803d; padding:3px 8px; border-radius:12px; font-size:12px; font-weight:bold;">✔ Sí</span>
+                    <span th:unless="${p.puedeCrear}" style="background:#fee2e2; color:#b91c1c; padding:3px 8px; border-radius:12px; font-size:12px;">✖ No</span>
+                </td>
+                <td style="text-align:center;">
+                    <span th:if="${p.puedeEditar}" style="background:#dcfce7; color:#15803d; padding:3px 8px; border-radius:12px; font-size:12px; font-weight:bold;">✔ Sí</span>
+                    <span th:unless="${p.puedeEditar}" style="background:#fee2e2; color:#b91c1c; padding:3px 8px; border-radius:12px; font-size:12px;">✖ No</span>
+                </td>
+                <td style="text-align:center;">
+                    <span th:if="${p.puedeEliminar}" style="background:#dcfce7; color:#15803d; padding:3px 8px; border-radius:12px; font-size:12px; font-weight:bold;">✔ Sí</span>
+                    <span th:unless="${p.puedeEliminar}" style="background:#fee2e2; color:#b91c1c; padding:3px 8px; border-radius:12px; font-size:12px;">✖ No</span>
+                </td>
+                <td>
+                    <form th:if="${!(p.username == 'admin' and p.codigoModulo == 'MOD_SEGURIDAD')}" action="/usuarios/permiso/revocar" method="post" style="margin:0;">
+                        <input type="hidden" name="username" th:value="${p.username}">
+                        <input type="hidden" name="codigoModulo" th:value="${p.codigoModulo}">
+                        <button type="submit" style="background:#ef4444; padding:5px 10px; width:auto; font-size:12px;">Revocar</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>sss
     </div>
     
 
@@ -154,5 +210,8 @@
         </table>
     </div>
 </div>
+<script th:replace="~{fragmentos/ui :: seguridadVisual(${permisosMap})}"></script>
+</body>
+
 </body>
 </html>

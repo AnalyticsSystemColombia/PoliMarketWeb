@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="~{fragmentos/ui :: estilos('PoliMarket - Proveedores')}"></head>
+<body>
+<header th:replace="~{fragmentos/ui :: navbar(${nombreUsuario}, ${modulos}, 'proveedores')}"></header>
+
+<div class="container">
+    <!-- FORMULARIO PARA CREAR Y EDITAR PROVEEDORES -->
+    <div class="card">
+        <h3>Gestión y Registro de Proveedores</h3>
+        <form data-modulo="MOD_PROVEEDORES" data-accion="CREAR" action="/proveedores/guardar" method="post" class="grid-form">
+            <input type="text" id="prov-nit" name="nit" placeholder="NIT de la Empresa" required>
+            <input type="text" id="prov-nom" name="nombre" placeholder="Nombre del Proveedor" required>
+            <input type="text" id="prov-con" name="contacto" placeholder="Persona de Contacto" required>
+            <input type="text" id="prov-tel" name="telefono" placeholder="Teléfono" required>
+            <div style="display:flex; gap:6px;">
+                <button type="submit">Guardar</button>
+                <button type="button" onclick="limpiarProveedor()" style="background:#64748b; width:auto;">Nuevo</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- TABLA DE PROVEEDORES REGISTRADOS -->
+    <div class="card">
+        <h3>Directorio de Proveedores Activos</h3>
+        <table data-modulo="MOD_PROVEEDORES" data-accion="LEER">
+            <thead>
+                <tr>
+                    <th>NIT</th>
+                    <th>Empresa</th>
+                    <th>Contacto</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="pr : ${proveedores}">
+                    <td><strong th:text="${pr?.get('nit')}"></strong></td>
+                    <td th:text="${pr?.get('nombre')}"></td>
+                    <td th:text="${pr?.get('contacto')}"></td>
+                    <td th:text="${pr?.get('telefono')}"></td>
+                    <td style="display:flex; gap:6px;">
+                        <button data-modulo="MOD_PROVEEDORES" data-accion="EDITAR" type="button"
+                                style="background:#f59e0b; padding:5px 10px; width:auto; font-size:12px;"
+                                th:data-nit="${pr?.get('nit')}"
+                                th:data-nom="${pr?.get('nombre')}"
+                                th:data-con="${pr?.get('contacto')}"
+                                th:data-tel="${pr?.get('telefono')}"
+                                onclick="cargarProveedorBtn(this)">
+                            Editar
+                        </button>
+                        <form data-modulo="MOD_PROVEEDORES" data-accion="ELIMINAR" action="/proveedores/eliminar" method="post" style="margin:0;">
+                            <input type="hidden" name="nit" th:value="${pr?.get('nit')}">
+                            <button type="submit" style="background:#ef4444; padding:5px 10px; width:auto; font-size:12px;">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function cargarProveedorBtn(btn) {
+        const inputNit = document.getElementById('prov-nit');
+        inputNit.value = btn.getAttribute('data-nit');
+        inputNit.readOnly = true;
+        inputNit.style.background = '#e2e8f0';
+        document.getElementById('prov-nom').value = btn.getAttribute('data-nom');
+        document.getElementById('prov-con').value = btn.getAttribute('data-con');
+        document.getElementById('prov-tel').value = btn.getAttribute('data-tel');
+        document.getElementById('prov-nom').focus();
+    }
+
+    function limpiarProveedor() {
+        const inputNit = document.getElementById('prov-nit');
+        inputNit.value = '';
+        inputNit.readOnly = false;
+        inputNit.style.background = 'white';
+        document.getElementById('prov-nom').value = '';
+        document.getElementById('prov-con').value = '';
+        document.getElementById('prov-tel').value = '';
+        inputNit.focus();
+    }
+</script>
+
+<script th:replace="~{fragmentos/ui :: seguridadVisual(${permisosMap})}"></script>
+<script th:replace="~{fragmentos/ui :: notificaciones}"></script>
+</body>
+</html>

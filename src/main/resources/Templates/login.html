@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="http://thymeleaf.org">
-<head th:replace="~{fragmentos/ui :: estilos('PoliMarket - Login Java Web')}"></head>
+<head th:replace="~{fragmentos/ui :: estilos('PoliMarket - Iniciar Sesión')}"></head>
 <body style="display:flex; justify-content:center; align-items:center; height:100vh; background:#0f172a;">
-    <div class="card" style="width:350px; padding:30px;">
-        <h2 style="text-align:center; color:#0f172a; margin-top:0;">PoliMarket Java Web</h2>
-        <p style="text-align:center; color:#64748b; font-size:13px;">Acceso Dinámico por Permisos</p>
+    <div class="card" style="width:360px; padding:30px;">
+        <h2 style="text-align:center; color:#0f172a; margin-top:0;">PoliMarket</h2>
+        <p style="text-align:center; color:#64748b; font-size:13px;">Control de Acceso y Operaciones</p>
+        <div th:if="${error}" style="background:#fee2e2; color:#b91c1c; padding:10px; border-radius:6px; margin-bottom:15px; font-size:13px;" th:text="${error}"></div>
         <form action="/login" method="post" style="display:flex; flex-direction:column; gap:12px;">
-            <input type="text" name="username" placeholder="Usuario" required>
-            <input type="password" name="password" placeholder="Contraseña" required>
-            <button type="submit">Ingresar</button>
+            <input type="text" name="username" placeholder="Usuario (Ej: admin)" required>
+            <input type="password" name="password" placeholder="Contraseña (Ej: 1234)" required>
+            <button type="submit">Ingresar al Sistema</button>
         </form>
-        <p th:if="${error}" th:text="${error}" style="color:#dc2626; text-align:center; font-size:13px;"></p>
     </div>
 </body>
 </html>

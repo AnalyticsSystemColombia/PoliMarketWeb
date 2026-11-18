@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="~{fragmentos/ui :: estilos('PoliMarket - Ventas y Clientes')}"></head>
+<body>
+<header th:replace="~{fragmentos/ui :: navbar(${nombreUsuario}, ${modulos}, 'ventas')}"></header>
+
+<div class="container">
+    <!-- 1. REGISTRO DE VENTAS -->
+    <div class="card">
+        <h3>1. Registro de Ventas (Consulta de Stock en Tiempo Real)</h3>
+        <form data-modulo="MOD_VENTAS" data-accion="CREAR" action="/ventas/registrar" method="post" class="grid-form">
+            <select name="documentoCliente" required>
+                <option value="" disabled selected>Seleccione Cliente...</option>
+                <option th:each="c : ${clientes}" th:value="${c?.get('documento')}" th:text="${c?.get('nombre') + ' (' + c?.get('documento') + ')'}"></option>
+            </select>
+            <select name="codigoProducto" required>
+                <option value="" disabled selected>Seleccione Producto Disponible...</option>
+                <option th:each="d : ${disponibles}" th:value="${d?.get('codigo')}" th:text="${d?.get('nombre') + ' - $' + d?.get('precioVenta') + ' (Disp: ' + d?.get('stockDisponible') + ')'}"></option>
+            </select>
+            <input type="number" name="cantidad" value="1" min="1" placeholder="Cantidad" required>
+            <button type="submit" style="background:#10b981;">Registrar Venta</button>
+        </form>
+
+        <table data-modulo="MOD_VENTAS" data-accion="LEER">
+            <thead>
+                <tr><th>ID Venta</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Total Venta</th><th>Estado</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="v : ${ventas}">
+                    <td><strong th:text="${'#' + v?.get('id')}"></strong></td>
+                    <td th:text="${v?.get('documentoCliente')}"></td>
+                    <td th:text="${v?.get('codigoProducto')}"></td>
+                    <td th:text="${v?.get('cantidad')}"></td>
+                    <td><strong th:text="${'$' + v?.get('totalVenta')}"></strong></td>
+                    <td><span style="background:#dcfce7; color:#15803d; padding:3px 8px; border-radius:12px; font-size:12px; font-weight:bold;" th:text="${v?.get('estado')}"></span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 2. DIRECTORIO DE CLIENTES -->
+    <div class="card">
+        <h3>2. Directorio y Gestión de Clientes</h3>
+        <form data-modulo="MOD_VENTAS" data-accion="CREAR" action="/ventas/clientes/guardar" method="post" class="grid-form">
+            <input type="text" id="cli-doc" name="documento" placeholder="Documento / NIT" required>
+            <input type="text" id="cli-nom" name="nombre" placeholder="Nombre Completo" required>
+            <input type="text" id="cli-dir" name="direccionEntrega" placeholder="Dirección de Entrega" required>
+            <input type="text" id="cli-tel" name="telefono" placeholder="Teléfono" required>
+            <div style="display:flex; gap:6px;">
+                <button type="submit">Guardar</button>
+                <button type="button" onclick="limpiarCliente()" style="background:#64748b; width:auto;">Nuevo</button>
+            </div>
+        </form>
+
+        <table data-modulo="MOD_VENTAS" data-accion="LEER">
+            <thead>
+                <tr><th>Documento</th><th>Nombre</th><th>Dirección de Entrega</th><th>Teléfono</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="c : ${clientes}">
+                    <td><strong th:text="${c?.get('documento')}"></strong></td>
+                    <td th:text="${c?.get('nombre')}"></td>
+                    <td th:text="${c?.get('direccionEntrega')}"></td>
+                    <td th:text="${c?.get('telefono')}"></td>
+                    <td style="display:flex; gap:6px;">
+                        <button data-modulo="MOD_VENTAS" data-accion="EDITAR" type="button"
+                                style="background:#f59e0b; padding:5px 10px; width:auto; font-size:12px;"
+                                th:data-doc="${c?.get('documento')}"
+                                th:data-nom="${c?.get('nombre')}"
+                                th:data-dir="${c?.get('direccionEntrega')}"
+                                th:data-tel="${c?.get('telefono')}"
+                                onclick="cargarClienteBtn(this)">
+                            Editar
+                        </button>
+                        <form data-modulo="MOD_VENTAS" data-accion="ELIMINAR" action="/ventas/clientes/eliminar" method="post" style="margin:0;">
+                            <input type="hidden" name="documento" th:value="${c?.get('documento')}">
+                            <button type="submit" style="background:#ef4444; padding:5px 10px; width:auto; font-size:12px;">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function cargarClienteBtn(btn) {
+        const inputDoc = document.getElementById('cli-doc');
+        inputDoc.value = btn.getAttribute('data-doc');
+        inputDoc.readOnly = true;
+        inputDoc.style.background = '#e2e8f0';
+        document.getElementById('cli-nom').value = btn.getAttribute('data-nom');
+        document.getElementById('cli-dir').value = btn.getAttribute('data-dir');
+        document.getElementById('cli-tel').value = btn.getAttribute('data-tel');
+        document.getElementById('cli-nom').focus();
+    }
+
+    function limpiarCliente() {
+        const inputDoc = document.getElementById('cli-doc');
+        inputDoc.value = '';
+        inputDoc.readOnly = false;
+        inputDoc.style.background = 'white';
+        document.getElementById('cli-nom').value = '';
+        document.getElementById('cli-dir').value = '';
+        document.getElementById('cli-tel').value = '';
+        inputDoc.focus();
+    }
+</script>
+
+<script th:replace="~{fragmentos/ui :: seguridadVisual(${permisosMap})}"></script>
+<script th:replace="~{fragmentos/ui :: notificaciones}"></script>
+</body>
+</html>

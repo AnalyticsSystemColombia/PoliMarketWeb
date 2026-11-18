@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="~{fragmentos/ui :: estilos('PoliMarket - Sin Permisos')}"></head>
+<body style="display:flex; justify-content:center; align-items:center; height:100vh; background:#0f172a;">
+    <div class="card" style="width:400px; text-align:center; padding:35px;">
+        <h2 style="color:#0f172a; margin-top:0;">Acceso Restringido</h2>
+        <p style="color:#64748b; font-size:14px; line-height:1.5; margin-bottom:25px;">
+            Tu usuario se encuentra activo en el sistema, pero aún no tienes módulos operativos asignados. 
+            Solicita al área de <strong>Seguridad y Recursos Humanos</strong> que habilite tus permisos.
+        </p>
+        <a href="/salir" style="display:inline-block; background:#ef4444; color:white; padding:10px 20px; border-radius:6px; text-decoration:none; font-weight:bold;">
+            Cerrar Sesión y Volver
+        </a>
+    </div>
+</body>
+</html>

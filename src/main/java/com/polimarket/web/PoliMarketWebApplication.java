@@ -1,4 +1,4 @@
-package ClientePoliMarketWeb; // (o deja el package que ya tenía arriba)
+package com.polimarket.web; // (o deja el package que ya tenía arriba)
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,0 +1,29 @@
+    <!-- HISTORIAL DE FACTURAS DE COMPRA E INGRESOS -->
+     <!-- HISTORIAL DE FACTURAS DE COMPRA E INGRESOS -->
+    <div class="card">
+        <h3>Historial de Facturas de Compra e Ingresos</h3>
+        <table data-modulo="MOD_BODEGA" data-accion="LEER">
+            <thead>
+                <tr>
+                    <th>N° Factura</th>
+                    <th>Equipo / Producto</th>
+                    <th>Cantidad Alta</th>
+                    <th>Costo Unitario</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="f : ${facturas}">
+                    <td><strong style="color:#0284c7;" th:text="${f?.get('numeroFactura')}"></strong></td>
+                    <td><strong th:text="${nombresProductos != null ? (nombresProductos[f?.get('codigoProducto')] ?: f?.get('codigoProducto')) : f?.get('codigoProducto')}"></strong></td>
+                    <td><span style="background:#dcfce7; color:#15803d; padding:3px 8px; border-radius:12px; font-weight:bold;" th:text="${'+' + f?.get('cantidadIngresada') + ' und.'}"></span></td>
+                    <td>
+                        <strong th:text="${f?.get('costoUnitario') != null ? '$' + #numbers.formatInteger(f.get('costoUnitario'), 1, 'POINT') : '$0'}"></strong>
+                    </td>
+                    <td style="font-size:12px; color:#475569;"
+                        th:text="${f?.get('fechaRegistro') ?: 'Sin fecha'}">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
